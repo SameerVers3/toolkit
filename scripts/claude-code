@@ -1,7 +1,8 @@
 #!/usr/bin/env bash
 set -euo pipefail
 
-REPO_ROOT="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
+SCRIPT_PATH="$(readlink -f "${BASH_SOURCE[0]}")"
+REPO_ROOT="$(cd "$(dirname "$SCRIPT_PATH")/.." && pwd)"
 CONFIG_DIR="${HOME}/.config/toolkit"
 ENV_FILE="${CONFIG_DIR}/.relay-env"
 VENV_DIR="${REPO_ROOT}/.venv"
@@ -77,15 +78,15 @@ detect_user_shell() {
 
 ensure_on_path() {
   mkdir -p "$BIN_DIR"
-  chmod +x "$REPO_ROOT/scripts/claude-code"
+  chmod +x "$SCRIPT_PATH"
 
   if [[ -L "$BIN_PATH" || -e "$BIN_PATH" ]]; then
-    if [[ "$(readlink -f "$BIN_PATH" 2>/dev/null || true)" != "$(readlink -f "$REPO_ROOT/scripts/claude-code")" ]]; then
-      ln -sfn "$REPO_ROOT/scripts/claude-code" "$BIN_PATH"
+    if [[ "$(readlink -f "$BIN_PATH" 2>/dev/null || true)" != "$SCRIPT_PATH" ]]; then
+      ln -sfn "$SCRIPT_PATH" "$BIN_PATH"
       info "Updated symlink: ${BIN_PATH}"
     fi
   else
-    ln -sfn "$REPO_ROOT/scripts/claude-code" "$BIN_PATH"
+    ln -sfn "$SCRIPT_PATH" "$BIN_PATH"
     info "Installed command: ${BIN_NAME}"
     info "Run from anywhere: ${BIN_NAME}"
   fi
@@ -317,6 +318,14 @@ start_relay() {
 launch_claude() {
   if ! command -v claude >/dev/null 2>&1; then
     die "claude CLI not found on PATH. Install Claude Code first."
+  fi
+
+  if [[ $# -gt 0 && -d "$1" ]]; then
+    local target
+    target="$(cd "$1" && pwd)" || die "cannot open directory: $1"
+    cd "$target" || die "cannot cd to ${target}"
+    info "Working directory: ${target}"
+    shift
   fi
 
   info "Opening Claude Code…"

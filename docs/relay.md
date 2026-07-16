@@ -14,6 +14,8 @@ Claude Code  <->  relay (:8080)  <->  Fireworks
 
 ## Claude Code
 
+Manual exports:
+
 ```bash
 export ANTHROPIC_BASE_URL="http://127.0.0.1:8080"
 export ANTHROPIC_AUTH_TOKEN="fw_your_fireworks_key"
@@ -23,7 +25,18 @@ unset ANTHROPIC_API_KEY
 
 Use a Claude-looking model id in Claude Code. Map it to Fireworks via `MODEL_MAP` in `.env`. Don't set both `ANTHROPIC_API_KEY` and `ANTHROPIC_AUTH_TOKEN`.
 
-Or run `./scripts/claude-code` / `tkr-claude-code`.
+### Launcher (`scripts/claude-code`)
+
+Prompts for the exports above, saves them to `~/.config/toolkit/.relay-env`, ensures the venv/package, starts the relay if needed, then opens Claude Code. Installs itself on PATH as `tkr-claude-code`.
+
+```bash
+./scripts/claude-code          # from the repo
+tkr-claude-code                # from anywhere (after first run)
+tkr-claude-code .              # open Claude Code in the current directory
+tkr-claude-code /path/to/proj  # open Claude Code in that project
+```
+
+A directory argument (like `.`) is treated as the working directory, Claude Code is started there. Extra args are forwarded to `claude`.
 
 ## Config
 
