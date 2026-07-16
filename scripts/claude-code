@@ -12,7 +12,7 @@ RELAY_PID_FILE="${CONFIG_DIR}/.relay.pid"
 RELAY_LOG_FILE="${CONFIG_DIR}/.relay.log"
 
 DEFAULT_BASE_URL="http://127.0.0.1:8080"
-DEFAULT_MODEL="accounts/fireworks/models/kimi-k2p5"
+DEFAULT_MODEL="claude-sonnet-4-6"
 DEFAULT_API_KEY=""
 
 info()  { printf '\033[1;34m==>\033[0m %s\n' "$*"; }
@@ -144,7 +144,7 @@ save_env() {
   umask 077
   cat > "$ENV_FILE" <<EOF
 ANTHROPIC_BASE_URL=${ANTHROPIC_BASE_URL}
-ANTHROPIC_API_KEY=${ANTHROPIC_API_KEY}
+ANTHROPIC_AUTH_TOKEN=${ANTHROPIC_API_KEY}
 ANTHROPIC_MODEL=${ANTHROPIC_MODEL}
 EOF
   chmod 600 "$ENV_FILE"
@@ -154,6 +154,13 @@ EOF
 configure_exports() {
   load_saved_env
 
+  # Migrate old fireworks model ids to a Claude-looking alias (mapped in .env).
+  case "${ANTHROPIC_MODEL}" in
+    accounts/fireworks/models/kimi-k2p5|accounts/fireworks/models/kimi-k2p6)
+      ANTHROPIC_MODEL="$DEFAULT_MODEL"
+      ;;
+  esac
+
   info "Claude Code exports (Enter keeps current value)"
   prompt_value ANTHROPIC_BASE_URL "ANTHROPIC_BASE_URL" "${ANTHROPIC_BASE_URL}"
   prompt_value ANTHROPIC_MODEL     "ANTHROPIC_MODEL"     "${ANTHROPIC_MODEL}"
@@ -161,12 +168,12 @@ configure_exports() {
   local existing_key="${ANTHROPIC_API_KEY:-}"
   local new_key=""
   if [[ -n "$existing_key" ]]; then
-    prompt_secret new_key "ANTHROPIC_API_KEY" "$(mask_key "$existing_key")"
+    prompt_secret new_key "ANTHROPIC_AUTH_TOKEN (Fireworks key)" "$(mask_key "$existing_key")"
     if [[ -n "$new_key" ]]; then
       ANTHROPIC_API_KEY="$new_key"
     fi
   else
-    prompt_secret new_key "ANTHROPIC_API_KEY (Fireworks key)"
+    prompt_secret new_key "ANTHROPIC_AUTH_TOKEN (Fireworks key)"
     ANTHROPIC_API_KEY="$new_key"
   fi
 
@@ -177,7 +184,7 @@ configure_exports() {
     die "ANTHROPIC_MODEL is required"
   fi
   if [[ -z "${ANTHROPIC_API_KEY}" ]]; then
-    die "ANTHROPIC_API_KEY is required"
+    die "ANTHROPIC_AUTH_TOKEN is required"
   fi
 
   save_env
@@ -314,9 +321,9 @@ launch_claude() {
 
   info "Opening Claude Code…"
   export ANTHROPIC_BASE_URL
-  export ANTHROPIC_API_KEY
   export ANTHROPIC_MODEL
   export ANTHROPIC_AUTH_TOKEN="${ANTHROPIC_API_KEY}"
+  unset ANTHROPIC_API_KEY
 
   exec claude "$@"
 }

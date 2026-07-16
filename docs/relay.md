@@ -16,11 +16,14 @@ Claude Code  <->  relay (:8080)  <->  Fireworks
 
 ```bash
 export ANTHROPIC_BASE_URL="http://127.0.0.1:8080"
-export ANTHROPIC_API_KEY="fw_your_fireworks_key"
-export ANTHROPIC_MODEL="accounts/fireworks/models/kimi-k2p5"
+export ANTHROPIC_AUTH_TOKEN="fw_your_fireworks_key"
+export ANTHROPIC_MODEL="claude-sonnet-4-6"
+unset ANTHROPIC_API_KEY
 ```
 
-`ANTHROPIC_AUTH_TOKEN` works too (Bearer). The relay accepts both.
+Use a Claude-looking model id in Claude Code. Map it to Fireworks via `MODEL_MAP` in `.env`. Don't set both `ANTHROPIC_API_KEY` and `ANTHROPIC_AUTH_TOKEN`.
+
+Or run `./scripts/claude-code` / `tkr-claude-code`.
 
 ## Config
 
