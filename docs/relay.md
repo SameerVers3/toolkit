@@ -6,6 +6,17 @@ Local server that speaks the Anthropic Messages API and forwards to Fireworks. B
 Claude Code  <->  relay (:8080)  <->  Fireworks
 ```
 
+## Setup
+
+```bash
+python -m venv .venv
+source .venv/bin/activate.fish   # bash: source .venv/bin/activate
+pip install -e .
+cp .env.example .env
+```
+
+Or skip this and use `./scripts/claude-code` / `tkr-claude-code`, which handles venv + install for you.
+
 ## Run
 
 ```bash
