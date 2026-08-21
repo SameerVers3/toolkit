@@ -8,16 +8,30 @@ FIREWORKS_REQUEST_EXTENSIONS = frozenset({"raw_output", "inference_geo"})
 FIREWORKS_RESPONSE_EXTRA_KEYS = frozenset({"raw_output", "object"})
 _MSG_ID_RE = re.compile(r"^msg_[a-zA-Z0-9]+$")
 
+def _strip_pattern_keys(node: Any) -> Any:
+    if isinstance(node, dict):
+        return {
+            k: _strip_pattern_keys(v)
+            for k, v in node.items()
+            if k != "pattern"
+        }
+    if isinstance(node, list):
+        return [_strip_pattern_keys(v) for v in node]
+    return node
+
 
 def prepare_fireworks_request_body(
     body: dict[str, Any],
     *,
     strip_extensions: bool = True,
+    strip_tool_patterns: bool = True,
 ) -> dict[str, Any]:
     cleaned = dict(body)
     if strip_extensions:
         for key in FIREWORKS_REQUEST_EXTENSIONS:
             cleaned.pop(key, None)
+    if strip_tool_patterns and isinstance(cleaned.get("tools"), list):
+        cleaned["tools"] = [_strip_pattern_keys(t) for t in cleaned["tools"]]
     return cleaned
 
 
