@@ -28,6 +28,8 @@ prompt_value() {
     printf '%s: ' "$__label"
   fi
   IFS= read -r __input || true
+  # Strip ANSI escape sequences (arrow keys, cursor movement, etc.)
+  __input="$(printf '%s' "$__input" | sed 's/\x1b\[[0-9;]*[A-Za-z]//g')"
   if [[ -z "$__input" ]]; then
     __input="$__default"
   fi
@@ -42,6 +44,8 @@ prompt_secret() {
     printf '%s: ' "$__label"
   fi
   IFS= read -rs __input || true
+  # Strip ANSI escape sequences (arrow keys, cursor movement, etc.)
+  __input="$(printf '%s' "$__input" | sed 's/\x1b\[[0-9;]*[A-Za-z]//g')"
   printf '\n'
   if [[ -z "$__input" && -n "$__hint" ]]; then
     printf -v "$__var" '%s' ""
