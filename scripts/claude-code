@@ -13,7 +13,7 @@ RELAY_PID_FILE="${CONFIG_DIR}/.relay.pid"
 RELAY_LOG_FILE="${CONFIG_DIR}/.relay.log"
 
 DEFAULT_BASE_URL="http://127.0.0.1:8080"
-DEFAULT_MODEL="claude-sonnet-4-6"
+DEFAULT_MODEL="accounts/fireworks/models/kimi-k2p6"
 DEFAULT_API_KEY=""
 
 info()  { printf '\033[1;34m==>\033[0m %s\n' "$*"; }
